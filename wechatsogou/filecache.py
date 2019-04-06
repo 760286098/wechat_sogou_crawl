@@ -4,6 +4,7 @@ from werkzeug.contrib.cache import FileSystemCache
 
 from .base import WechatSogouBase
 
+
 class WechatCache(WechatSogouBase):
     """基于文件的缓存
 

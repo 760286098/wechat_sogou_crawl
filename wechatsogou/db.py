@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pymysql
+
 from . import config
 
 
@@ -27,7 +28,7 @@ class mysql():
     m.where({}).delete() # 删除
     """
 
-    def __init__(self,table='', prefix='', host='',user='',passwd='',db='',charset=''):
+    def __init__(self, table='', prefix='', host='', user='', passwd='', db='', charset=''):
         """初始化
 
         table是初始化选择的表，后面可以使用table()函数更改

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import requests
 from hashlib import md5
 
+import requests
+
 from .base import WechatSogouBase
+
 
 class RClient(WechatSogouBase):
 

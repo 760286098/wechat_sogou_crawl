@@ -2,9 +2,11 @@
 
 import json
 
+
 def prdict(content):
     msg = json.dumps(content, indent=1, ensure_ascii=False)
     print(msg)
+
 
 def list_or_empty(content, contype=None):
     if isinstance(content, list):
