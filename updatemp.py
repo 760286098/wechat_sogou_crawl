@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # 查找公众号最新文章
 
-import datetime
 import logging.config
 import random
 import time
@@ -34,10 +33,6 @@ mp_list = mysql.find(0)
 
 succ_count = 0
 
-now_time = datetime.datetime.today()
-now_time = datetime.datetime(now_time.year, now_time.month, now_time.day, 0, 0, 0)
-# now_time = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(now_time))
-
 for item in mp_list:
     try:
         time.sleep(random.randrange(1, 3))
@@ -49,14 +44,12 @@ for item in mp_list:
         wz_url = item['wz_url']
 
         print(item['name'])
-
         # 获取最近文章信息
         wz_list = wechats.get_gzh_message(url=wz_url)
         if u'链接已过期' in wz_list:
             wechat_info = wechats.get_gzh_info(item['wx_hao'])
             if 'url' not in wechat_info:
                 continue
-            print('guo qi sz chong xin huo qu success')
             wz_url = wechat_info['url'];
             wz_list = wechats.get_gzh_message(url=wz_url)
             mysql.where_sql = " _id=%s" % (item['_id'])
@@ -68,7 +61,6 @@ for item in mp_list:
             temp_qunfa_id = int(wz_item['qunfa_id'])
             if (last_qunfa_id >= temp_qunfa_id):
                 print(u"没有更新文章")
-                print(u"")
                 break
             if (cur_qunfa_id < temp_qunfa_id):
                 cur_qunfa_id = temp_qunfa_id
@@ -78,7 +70,6 @@ for item in mp_list:
                 # 把文章写入数据库
                 # 更新文章条数
                 print(succ_count)
-                print(wz_item['content_url'])
                 if not wz_item['content_url']:
                     continue
 
@@ -114,10 +105,9 @@ for item in mp_list:
             mysql.table('mp_info').save({'last_qunfa_id': cur_qunfa_id, 'last_qufa_time': qunfa_time,
                                          'update_time': time.strftime("%Y-%m-%d %H:%M:%S",
                                                                       time.localtime(time.time()))})
-    except KeyboardInterrupt:
-        break
-    # except: #如果不想因为错误使程序退出，可以开启这两句代码
-    #     print(u"出错，继续")
-    #     continue
+    except:  # 如果不想因为错误使程序退出，可以开启这两句代码
+        logger.exception("Exception Logged: updatemp")
+        print(u"出错，继续")
+        continue
 
 print('success')

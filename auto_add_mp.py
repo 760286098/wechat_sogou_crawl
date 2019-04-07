@@ -22,15 +22,13 @@ succ_count = 0
 
 for add_item in add_list:
     try:
-        print(add_item)
         if add_item['wx_hao']:
-            print("add by wx_hao")
+            print("add by wx_hao: %s" % add_item)
             mysql.where_sql = "wx_hao ='" + add_item['wx_hao'] + "'"
             mp_data = mysql.table('mp_info').find(1)
             if not mp_data:
                 wechat_info = wechats.get_gzh_info(add_item['wx_hao'])
                 time.sleep(1)
-                # print(wechat_info)
                 if (wechat_info != ""):
                     mysql.table('mp_info').add({'name': wechat_info['name'],
                                                 'wx_hao': wechat_info['wechatid'],
@@ -46,19 +44,15 @@ for add_item in add_list:
                 print(u"已经存在的公众号")
         elif add_item['name']:
             # 获取对应信息
-            print("add by name")
+            print("add by name: %s" % add_item)
             wechat_infos = wechats.search_gzh_info(add_item['name'].encode('utf8'))
             time.sleep(1)
-            # print(wechat_infos)
             for wx_item in wechat_infos:
                 # 公众号数据写入数据库
                 # 搜索一下是否已经存在
-                print(wx_item['name'])
                 mysql.where_sql = "wx_hao ='" + wx_item['wechatid'] + "'"
-                print(mysql.where_sql)
                 mp_data = mysql.table('mp_info').find(1)
                 if not mp_data:
-                    print(wx_item['name'])
                     mysql.table('mp_info').add({'name': wx_item['name'],
                                                 'wx_hao': wx_item['wechatid'],
                                                 'company': wx_item['renzhen'],
@@ -75,6 +69,7 @@ for add_item in add_list:
         # 删除已添加项
         mysql.table('add_mp_list').where({'_id': add_item['_id']}).delete()
     except:
+        logger.exception("Exception Logged: auto_add_mp")
         print(u"出错，继续")
         continue
 

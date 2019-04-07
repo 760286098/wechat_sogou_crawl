@@ -217,7 +217,3 @@ class mysql():
         where_sql = " where " + self.where_sql if hasattr(self, 'where_sql') else ""
         sql = "delete from `" + self.tablename + "`" + where_sql
         return self.__delete(sql)
-
-
-if __name__ == '__main__':
-    pass

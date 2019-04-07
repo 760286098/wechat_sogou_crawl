@@ -39,14 +39,3 @@ class RClient(WechatSogouBase):
         files = {'image': ('a.jpg', im)}
         r = requests.post('http://api.ruokuai.com/create.json', data=params, files=files, headers=self.headers)
         return r.json()
-
-    def report_error(self, im_id):
-        """
-        im_id:报错题目的ID
-        """
-        params = {
-            'id': im_id,
-        }
-        params.update(self.base_params)
-        r = requests.post('http://api.ruokuai.com/reporterror.json', data=params, headers=self.headers)
-        return r.json()
