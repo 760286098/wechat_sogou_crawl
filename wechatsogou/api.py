@@ -206,7 +206,8 @@ class WechatSogouApi(WechatSogouBasic):
             url = gzh_info['url']
             text = self._get_gzh_article_by_url_text(url)
         else:
-            raise WechatSogouException('get_gzh_message need param text and url')
+            # raise WechatSogouException('get_gzh_message need param text and url')
+            return '链接已过期'
 
         if u'链接已过期' in text:
             return '链接已过期'
@@ -258,7 +259,11 @@ class WechatSogouApi(WechatSogouBasic):
             content = html
 
             # 正则表达式javascript里的获取相关变量
-            ct = re.findall('var ct = "(.*?)";', content)[0]
+            tmp = re.findall('var ct = "(.*?)";', content)
+            if tmp:
+                ct = tmp[0]
+            else:
+                ct = ""
             msg_cdn_url = re.findall('var msg_cdn_url = "(.*?)";', content)[0]
             nickname = re.findall('var nickname = "(.*?)";', content)[0]
             if (nickname == ""):
@@ -328,12 +333,14 @@ class WechatSogouApi(WechatSogouBasic):
                         matchurlvalue = re.search(r'wx_fmt=(?P<wx_fmt>[^&]*)', orurl)  # 无参数的可能是gif，也有可能是jpg
                         if None != matchurlvalue:
                             wx_fmt = matchurlvalue.group('wx_fmt')  # 优先通过wx_fmt参数的值判断文件类型
+                            if '?' in wx_fmt:
+                                wx_fmt = wx_fmt.split('?')[0]
                         else:
                             wx_fmt = binascii.b2a_hex(content[0:4])  # 读取前4字节转化为16进制字符串
 
-                        phototype = {'jpeg': '.jpg', 'gif': '.gif', 'png': '.png', 'jpg': '.jpg', '47494638': '.gif',
-                                     'ffd8ffe0': '.jpg', 'ffd8ffe1': '.jpg', 'ffd8ffdb': '.jpg', 'ffd8fffe': '.jpg',
-                                     'other': '.jpg', '89504e47': '.png'}  # 方便写文件格式
+                        phototype = {'jpeg': '.jpg', 'gif': '.gif', 'png': '.png', 'jpg': '.jpg', b'47494638': '.gif',
+                                     b'ffd8ffe0': '.jpg', b'ffd8ffe1': '.jpg', b'ffd8ffdb': '.jpg', b'ffd8fffe': '.jpg',
+                                     'other': '.jpg', b'89504e47': '.png'}  # 方便写文件格式
                         file_name = 'Picture' + str(count) + phototype[wx_fmt]
                         file_path = dir + file_name
                         open(file_path, 'wb').write(content)
