@@ -69,7 +69,7 @@ for add_item in add_list:
         # 删除已添加项
         mysql.table('add_mp_list').where({'_id': add_item['_id']}).delete()
     except:
-        logger.exception("Exception Logged: auto_add_mp")
+        logger.exception("Exception Logged")
         print(u"出错，继续")
         continue
 

@@ -1,14 +1,137 @@
-2019-04-08 19:03:22,772 - [updatemp.py:109] - ERROR - Exception Logged: updatemp
+2019-04-10 09:33:36,351 - [api.py:93] - ERROR - Exception Logged
 Traceback (most recent call last):
-  File "D:/GitHub/wechat_sogou_crawl/updatemp.py", line 82, in <module>
-    index_html_path = wechats.down_html(wz_item['content_url'], wz_item['title'])
-  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 262, in down_html
-    ct = re.findall('var ct = "(.*?)";', content)[0]
-IndexError: list index out of range
-2019-04-08 19:23:26,863 - [updatemp.py:109] - ERROR - Exception Logged: updatemp
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 09:33:36,387 - [updatemp.py:109] - ERROR - Exception Logged
 Traceback (most recent call last):
-  File "D:/GitHub/wechat_sogou_crawl/updatemp.py", line 82, in <module>
-    index_html_path = wechats.down_html(wz_item['content_url'], wz_item['title'])
-  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 262, in down_html
-    ct = re.findall('var ct = "(.*?)";', content)[0]
-IndexError: list index out of range
+  File "D:/GitHub/wechat_sogou_crawl/updatemp.py", line 61, in <module>
+    temp_qunfa_id = int(wz_item['qunfa_id'])
+TypeError: string indices must be integers
+2019-04-10 13:03:10,528 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:18:24,852 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:18:24,949 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:18:25,085 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:19:31,967 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:19:31,975 - [updatemp.py:109] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:/GitHub/wechat_sogou_crawl/updatemp.py", line 61, in <module>
+    temp_qunfa_id = int(wz_item['qunfa_id'])
+TypeError: string indices must be integers
+2019-04-10 13:31:49,676 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:31:49,727 - [updatemp.py:109] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:/GitHub/wechat_sogou_crawl/updatemp.py", line 61, in <module>
+    temp_qunfa_id = int(wz_item['qunfa_id'])
+TypeError: string indices must be integers
+2019-04-10 13:44:04,339 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:44:04,350 - [updatemp.py:109] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:/GitHub/wechat_sogou_crawl/updatemp.py", line 61, in <module>
+    temp_qunfa_id = int(wz_item['qunfa_id'])
+TypeError: string indices must be integers
+2019-04-10 13:49:53,075 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:49:53,084 - [updatemp.py:109] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:/GitHub/wechat_sogou_crawl/updatemp.py", line 61, in <module>
+    temp_qunfa_id = int(wz_item['qunfa_id'])
+TypeError: string indices must be integers
+2019-04-10 13:56:11,411 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:56:11,521 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:56:11,588 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:56:11,678 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:56:11,772 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:56:11,838 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code
+2019-04-10 13:56:11,927 - [api.py:93] - ERROR - Exception Logged
+Traceback (most recent call last):
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\api.py", line 88, in search_gzh_info
+    text = self._get(url_temp, referer=request_url)  # 需要优化
+  File "D:\GitHub\wechat_sogou_crawl\wechatsogou\basic.py", line 137, in _get
+    raise WechatSogouVcodeException('weixin.sogou.com verification code')
+wechatsogou.exceptions.WechatSogouVcodeException: weixin.sogou.com verification code

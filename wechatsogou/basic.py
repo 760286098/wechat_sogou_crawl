@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import http.cookiejar as cookielib
 import json
 import logging
 import random
 import re
-import sys
 import time
 
 import requests
@@ -14,12 +14,6 @@ from .base import WechatSogouBase
 from .exceptions import *
 from .filecache import WechatCache
 from .ruokuaicode import RClient
-
-is_python3 = sys.version_info[0] > 2
-if not is_python3:
-    import cookielib
-else:
-    import http.cookiejar as cookielib
 
 try:
     from urllib.request import quote as quote
@@ -140,11 +134,9 @@ class WechatSogouBasic(WechatSogouBase):
             r.encoding = self._get_encoding_from_reponse(r)
             if u'用户您好，您的访问过于频繁，为确认本次访问为正常用户行为，需要您协助验证' in r.text or u'用户您好，我们的系统检测到您网络中存在异常访问请求' in r.text:
                 self._vcode_url = url
-                logger.error(u'出现验证码。。。')
-                print(u'用户您好，您的访问过于频繁，为确认本次访问为正常用户行为，需要您协助验证')
                 raise WechatSogouVcodeException('weixin.sogou.com verification code')
         else:
-            logger.error('requests status_code error %d' % (r.status_code))
+            logger.error('requests status_code error %d' % r.status_code)
             raise WechatSogouRequestsException('requests status_code error', r.status_code)
         return r.text
 
@@ -158,13 +150,16 @@ class WechatSogouBasic(WechatSogouBase):
 
         if hasattr(self, '_ocr'):
             max_count = 0
-            while (max_count < 10):
+            while max_count < 3:
                 max_count += 1
                 codeurl = 'https://weixin.sogou.com/antispider/util/seccode.php?tc=' + str(time.time())[0:10]
+                self._session.headers.update({'referer': 'https://weixin.sogou.com/antispider/?from=' +
+                                                         quote('http://weixin.sogou.com/weixin?type=1&query='
+                                                               + self._name)})
                 coder = self._session.get(codeurl, verify=False)
                 result = self._ocr.create(coder.content, 3060)
                 if 'Result' not in result:
-                    print(u"若快识别失败，1秒后更换验证码再次尝试，尝试次数：%d" % (max_count))
+                    print(u"若快识别失败，错误为：%s 1秒后更换验证码再次尝试，尝试次数：%d" % (result['Error'], max_count))
                     time.sleep(1)
                     continue  # 验证码识别错误，再次执行
                 else:
@@ -188,7 +183,7 @@ class WechatSogouBasic(WechatSogouBase):
                     rr = self._session.post(post_url, post_data, headers=headers, verify=False)
                     remsg = eval(rr.content)
                     if remsg['code'] != 0:
-                        print(u"搜狗返回验证码错误，1秒后更换验证码再次启动尝试，尝试次数：%d" % (max_count))
+                        print(u"搜狗返回验证码错误，1秒后更换验证码再次启动尝试，尝试次数：%d" % max_count)
                         time.sleep(1)
                         continue
 
@@ -228,7 +223,7 @@ class WechatSogouBasic(WechatSogouBase):
 
         if hasattr(self, '_ocr'):
             max_count = 0
-            while (max_count < 10):
+            while max_count < 3:
                 max_count += 1
                 timestr = str(time.time()).replace('.', '')
                 timever = timestr[0:13] + '.' + timestr[13:17]
@@ -236,7 +231,7 @@ class WechatSogouBasic(WechatSogouBase):
                 coder = self._session.get(codeurl, verify=False)
                 result = self._ocr.create(coder.content, 2040)
                 if 'Result' not in result:
-                    print(u"若快识别失败，1秒后更换验证码再次尝试，尝试次数：%d" % (max_count))
+                    print(u"若快识别失败，错误为：%s 1秒后更换验证码再次尝试，尝试次数：%d" % (result['Error'], max_count))
                     time.sleep(1)
                     continue  # 验证码识别错误，再次执行
                 else:
@@ -256,7 +251,7 @@ class WechatSogouBasic(WechatSogouBase):
                     rr = self._session.post(post_url, post_data, headers=headers, verify=False)
                     remsg = eval(rr.text)
                     if remsg['ret'] != 0:
-                        print(u"搜狗返回验证码错误，1秒后更换验证码再次启动尝试，尝试次数：%d" % (max_count))
+                        print(u"搜狗返回验证码错误，1秒后更换验证码再次启动尝试，尝试次数：%d" % max_count)
                         time.sleep(1)
                         continue
 
@@ -327,7 +322,7 @@ class WechatSogouBasic(WechatSogouBase):
         """
         request_url = 'https://weixin.sogou.com/weixin?type=1&s_from=input&query=' + quote(
             name) + '&ie=utf8&_sug_=n&_sug_type_=&page=' + str(page)
-
+        self._name = name
         try:
             text = self._get(request_url)
         except WechatSogouVcodeException:
@@ -337,14 +332,14 @@ class WechatSogouBasic(WechatSogouBase):
                                  referer='https://weixin.sogou.com/antispider/?from=%2f' + quote(
                                      self._vcode_url.replace('http://', '')))
             except WechatSogouVcodeException:
-                logger.exception("Exception Logged: _search_gzh_text")
+                logger.exception("Exception Logged")
                 text = ""
 
         try:
             new_url = "https://weixin.sogou.com" + re.findall('var account_anti_url = "(.+?)";', text, re.S)[0]
             self._get(new_url, 'get', referer=request_url)
         except:
-            logger.exception("Exception Logged: _search_gzh_text")
+            logger.exception("Exception Logged")
 
         return text, request_url
 
@@ -369,7 +364,7 @@ class WechatSogouBasic(WechatSogouBase):
 
                 text = self._get(url, 'get', host='mp.weixin.qq.com')
             except:
-                logger.exception("Exception Logged: _get_gzh_article_by_url_text")
+                logger.exception("Exception Logged")
                 text = ""
         return text
 
@@ -430,7 +425,8 @@ class WechatSogouBasic(WechatSogouBase):
             elif item['type'] == '3':
                 # 图片
                 item[
-                    'img_url'] = 'https://mp.weixin.qq.com/mp/getmediadata?__biz=' + biz + '&type=img&mode=small&msgid=' + \
+                    'img_url'] = 'https://mp.weixin.qq.com/mp/getmediadata?__biz=' + \
+                                 biz + '&type=img&mode=small&msgid=' + \
                                  str(item['qunfa_id']) + '&uin=' + uin + '&key=' + key
             elif item['type'] == '34':
                 # 音频

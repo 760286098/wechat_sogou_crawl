@@ -17,7 +17,7 @@ class MysqlDbException(DbException):
     pass
 
 
-class mysql():
+class mysql:
     """数据库类
 
     例子
@@ -72,10 +72,10 @@ class mysql():
         """更新语句，可执行update,insert语句
         """
         if type(sqls) is str:
-            sta = self.cur.execute(sqls)
+            self.cur.execute(sqls)
         elif type(sqls) is list:
             for sql in sqls:
-                sta = self.cur.execute(sql)
+                self.cur.execute(sql)
         else:
             raise MysqlDbException('更新语句参数错误 - Model.__update')
         self.conn.commit()

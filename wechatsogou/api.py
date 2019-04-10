@@ -7,7 +7,6 @@ import os
 import random
 import re
 import time
-import traceback
 import urllib
 
 import httplib2
@@ -32,12 +31,14 @@ class WechatSogouApi(WechatSogouBasic):
 
     def get_k_h(self, url, text):
         """计算k和h"""
+        k = 0
+        h = 0
         try:
             k = random.randrange(1, 100)
-            normal = re.findall('a\+4\+parseInt\("(.*?)"', text, re.S)[0]
+            normal = re.findall(r'a\+4\+parseInt\("(.*?)"', text, re.S)[0]
             h = url[34 + int(normal) + k]
         except:
-            logger.exception("Exception Logged: get_k_h")
+            logger.exception("Exception Logged")
         return str(k), h
 
     def search_gzh_info(self, name, page=1):
@@ -58,12 +59,12 @@ class WechatSogouApi(WechatSogouBasic):
             url: 文章地址
             last_url: 最后一篇文章地址 暂无
         """
-        htmlText, request_url = self._search_gzh_text(name, page)
+        html_text, request_url = self._search_gzh_text(name, page)
 
         try:
-            page = etree.HTML(htmlText)
+            page = etree.HTML(html_text)
         except:
-            logger.exception("Exception Logged: search_gzh_info")
+            logger.exception("Exception Logged")
             return ""
 
         img = list()
@@ -73,31 +74,29 @@ class WechatSogouApi(WechatSogouBasic):
             img.append(info_img.attrib['src'])
         # 文章列表
         url = list()
-        info_urls = page.xpath(u"//div[@class='img-box']//a");
+        info_urls = page.xpath(u"//div[@class='img-box']//a")
         for info_url in info_urls:
-            urlTemp = info_url.attrib['href']
+            url_temp = info_url.attrib['href']
             realurl = ""
-            if "https" not in urlTemp:
-                urlTemp = "https://weixin.sogou.com" + urlTemp
-                # urlTemp = "https://weixin.sogou.com/link?url=dn9a_-gY295K0Rci_xozVXfdMkSQTLW6EzDJysI4ql5MPrOUp16838dGRMI7NnPqd7f2zaZT8G5XX6CVLv7ghwwvDqyjOWdzJRR9kv142zmzO5mLYzdWtr0gCwKco-MoXapf6ecdCpf0FojXSUCaI0AbdUwNO9bh1Gmjh__CSkSsWFwwodqOp8Ow2hU_0OwS0h4lvHQbidemvuZ2FfgnOGRTpLLTNgHY&type=1&query=mh_syxx&k=56&h=V"
+            if "https" not in url_temp:
+                url_temp = "https://weixin.sogou.com" + url_temp
             try:
-
                 # 计算加密k
-                k, h = self.get_k_h(urlTemp, htmlText)
-                urlTemp = "%s&k=%s&h=%s" % (urlTemp, k, h)
+                k, h = self.get_k_h(url_temp, html_text)
+                url_temp = "%s&k=%s&h=%s" % (url_temp, k, h)
                 # 转成正式的文章列表url
-                text = self._get(urlTemp, referer=request_url)
-                arr = text.split("url +=");
+                text = self._get(url_temp, referer=request_url)  # 需要优化
+                arr = text.split("url +=")
                 for iterating_var in arr:
-                    realurl += iterating_var.split("'")[1];
+                    realurl += iterating_var.split("'")[1]
             except WechatSogouVcodeException:
-                logger.exception("Exception Logged: search_gzh_info")
+                logger.exception("Exception Logged")
                 realurl = ""
 
             url.append(realurl)
 
         # 微信号
-        wechatid = page.xpath(u"//label[@name='em_weixinhao']/text()");
+        wechatid = page.xpath(u"//label[@name='em_weixinhao']/text()")
 
         # 公众号名称
         name = list()
@@ -122,12 +121,12 @@ class WechatSogouApi(WechatSogouBasic):
             cache = cache.replace('red_beg', '').replace('red_end', '')
             cache_list = cache.split('\n')
             cache_re = re.split(u'功能介绍：|认证：|最近文章：', cache_list[0])
-            if (cache.find("最近文章") == -1):
+            if cache.find("最近文章") == -1:
                 last_url.insert(list_index, "")
             list_index += 1
 
-            if (len(cache_re) > 1):
-                jieshao.append(re.sub("document.write\(authname\('[0-9]'\)\)", "", cache_re[1]))
+            if len(cache_re) > 1:
+                jieshao.append(re.sub(r"document.write\(authname\('[0-9]'\)\)", "", cache_re[1]))
                 if "authname" in cache_re[1]:
                     renzhen.append(cache_re[2])
                 else:
@@ -175,7 +174,7 @@ class WechatSogouApi(WechatSogouBasic):
             info = self.search_gzh_info(wechatid, 1)
             return info[0] if info else ""
         except:
-            logger.exception("Exception Logged: get_gzh_info")
+            logger.exception("Exception Logged")
             return ""
 
     def get_gzh_message(self, **kwargs):
@@ -236,10 +235,10 @@ class WechatSogouApi(WechatSogouBasic):
             raise WechatSogouException('deal_article_content need param url or text')
 
         # 纯文字
-        bsObj = BeautifulSoup(text, features="lxml")
-        content_text = bsObj.find("div", {"class": "rich_media_content", "id": "js_content"})
+        bs_obj = BeautifulSoup(text, features="lxml")
+        content_text = bs_obj.find("div", {"class": "rich_media_content", "id": "js_content"})
         if not content_text:  # 分享的文章
-            content_text = bsObj.find("div", {"class": "share_media", "id": "js_share_content"})
+            content_text = bs_obj.find("div", {"class": "share_media", "id": "js_share_content"})
 
         content_html = ""
         if content_text:
@@ -266,9 +265,9 @@ class WechatSogouApi(WechatSogouBasic):
                 ct = ""
             msg_cdn_url = re.findall('var msg_cdn_url = "(.*?)";', content)[0]
             nickname = re.findall('var nickname = "(.*?)";', content)[0]
-            if (nickname == ""):
+            if nickname == "":
                 nickname = "not has name"
-            if (ct == ""):
+            if ct == "":
                 ct = time.time()
 
             ctime = time.strftime("%Y%m%d%H%M%S", time.localtime(int(ct)))  # int将字符串转成数字，不区分int和long, 这里将时间秒数转成日期格式
@@ -289,29 +288,29 @@ class WechatSogouApi(WechatSogouBasic):
             #         print("GB18030")
             #         nickname = nickname.decode('utf-8', 'ignore').encode('GB18030', 'ignore')
 
-            dir = 'WeiXinGZH/' + nickname + '/' + ctime + '/' + dir_name + '/'
-            # dir = dir.decode('gb2312', 'ignore')
-            dir = dir.replace("?", "")
-            dir = dir.replace("\\", "")
-            dir = dir.replace("*", "")
-            dir = dir.replace(":", "")
-            dir = dir.replace('\"', "")
-            dir = dir.replace("<", "")
-            dir = dir.replace(">", "")
-            dir = dir.replace("|", "")
+            my_dir = 'WeiXinGZH/' + nickname + '/' + ctime + '/' + dir_name + '/'
+            # my_dir = my_dir.decode('gb2312', 'ignore')
+            my_dir = my_dir.replace("?", "")
+            my_dir = my_dir.replace("\\", "")
+            my_dir = my_dir.replace("*", "")
+            my_dir = my_dir.replace(":", "")
+            my_dir = my_dir.replace('\"', "")
+            my_dir = my_dir.replace("<", "")
+            my_dir = my_dir.replace(">", "")
+            my_dir = my_dir.replace("|", "")
 
             try:
-                os.makedirs(dir)  # 建立相应的文件夹
+                os.makedirs(my_dir)  # 建立相应的文件夹
 
             except:
                 # 不处理
-                errormsg = 'none'
+                pass
 
             # 下载封面
             url = msg_cdn_url
             resp, contentface = h.request(url)
 
-            file_name = dir + 'cover.jpg'
+            file_name = my_dir + 'cover.jpg'
             codecs.open(file_name, mode='wb').write(contentface)
 
             # 下载其他图片
@@ -321,17 +320,17 @@ class WechatSogouApi(WechatSogouBasic):
             for link in soup.find_all('img'):
                 try:
                     err_count += 1
-                    if (err_count > 200):
+                    if err_count > 200:
                         break  # 防止陷阱
 
-                    if None != link.get('data-src'):
+                    if link.get('data-src') is not None:
                         count = count + 1
                         orurl = link.get('data-src')
                         url = orurl.split('?')[0]  # 重新构造url，原来的url有一部分无法下载
                         resp, content = h.request(url)
 
                         matchurlvalue = re.search(r'wx_fmt=(?P<wx_fmt>[^&]*)', orurl)  # 无参数的可能是gif，也有可能是jpg
-                        if None != matchurlvalue:
+                        if matchurlvalue is not None:
                             wx_fmt = matchurlvalue.group('wx_fmt')  # 优先通过wx_fmt参数的值判断文件类型
                             if '?' in wx_fmt:
                                 wx_fmt = wx_fmt.split('?')[0]
@@ -342,24 +341,24 @@ class WechatSogouApi(WechatSogouBasic):
                                      b'ffd8ffe0': '.jpg', b'ffd8ffe1': '.jpg', b'ffd8ffdb': '.jpg', b'ffd8fffe': '.jpg',
                                      'other': '.jpg', b'89504e47': '.png'}  # 方便写文件格式
                         file_name = 'Picture' + str(count) + phototype[wx_fmt]
-                        file_path = dir + file_name
+                        file_path = my_dir + file_name
                         open(file_path, 'wb').write(content)
 
                         # 图片替换成本地地址
                         re_url = 'data-src="%s(.+?)"' % (url[:-5])
-                        re_pic = 'src="%s"' % (file_name)
+                        re_pic = 'src="%s"' % file_name
                         html = re.sub(re_url, re_pic, html)
                 except:
-                    traceback.print_exc()
+                    logger.exception("Exception Logged")
                     continue
 
-            with open("%sindex.html" % (dir), "wb") as code:
+            with open("%sindex.html" % my_dir, "wb") as code:
                 code.write(html.encode('utf-8'))
 
             print(u'文章下载完成')
             ret_path = os.path.abspath('.')
             ret_path = ret_path.replace('\\', "/")
-            ret_path = "%s/%sindex.html" % (ret_path, dir)
+            ret_path = "%s/%sindex.html" % (ret_path, my_dir)
         except WechatSogouHistoryMsgException:
             print(u'文章内容有异常编码，无法下载')
             return ""

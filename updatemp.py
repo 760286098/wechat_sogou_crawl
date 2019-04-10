@@ -50,7 +50,7 @@ for item in mp_list:
             wechat_info = wechats.get_gzh_info(item['wx_hao'])
             if 'url' not in wechat_info:
                 continue
-            wz_url = wechat_info['url'];
+            wz_url = wechat_info['url']
             wz_list = wechats.get_gzh_message(url=wz_url)
             mysql.where_sql = " _id=%s" % (item['_id'])
             mysql.table('mp_info').where({'_id': item['_id']}).save(
@@ -106,7 +106,7 @@ for item in mp_list:
                                          'update_time': time.strftime("%Y-%m-%d %H:%M:%S",
                                                                       time.localtime(time.time()))})
     except:  # 如果不想因为错误使程序退出，可以开启这两句代码
-        logger.exception("Exception Logged: updatemp")
+        logger.exception("Exception Logged")
         print(u"出错，继续")
         continue
 
