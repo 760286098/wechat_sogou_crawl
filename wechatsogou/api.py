@@ -271,25 +271,8 @@ class WechatSogouApi(WechatSogouBasic):
                 ct = time.time()
 
             ctime = time.strftime("%Y%m%d%H%M%S", time.localtime(int(ct)))  # int将字符串转成数字，不区分int和long, 这里将时间秒数转成日期格式
-            # 建立文件夹
-            # 编码转换
-            # if isinstance(dir_name, str):
-            #     dir_name = dir_name.encode('GB18030', 'ignore')
-            # else:
-            #     dir_name = dir_name.decode('utf-8', 'ignore').encode('GB18030', 'ignore')
-            #
-            # if isinstance(nickname, str):
-            #     nickname = nickname.encode('GB18030', 'ignore')
-            # else:
-            #     if chardet.detect(nickname)['encoding'] == 'KOI8-R':
-            #         print("KOI8")
-            #         nickname = nickname.decode('KOI8-R', 'ignore').encode('GB18030', 'ignore')
-            #     else:
-            #         print("GB18030")
-            #         nickname = nickname.decode('utf-8', 'ignore').encode('GB18030', 'ignore')
 
             my_dir = 'WeiXinGZH/' + nickname + '/' + ctime + '/' + dir_name + '/'
-            # my_dir = my_dir.decode('gb2312', 'ignore')
             my_dir = my_dir.replace("?", "")
             my_dir = my_dir.replace("\\", "")
             my_dir = my_dir.replace("*", "")

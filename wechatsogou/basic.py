@@ -10,7 +10,6 @@ import time
 import requests
 
 from . import config
-from .base import WechatSogouBase
 from .exceptions import *
 from .filecache import WechatCache
 from .ruokuaicode import RClient
@@ -23,7 +22,7 @@ except ImportError:
 logger = logging.getLogger()
 
 
-class WechatSogouBasic(WechatSogouBase):
+class WechatSogouBasic:
     """基于搜狗搜索的的微信公众号爬虫接口 基本功能类
     """
 

@@ -4,10 +4,8 @@ from hashlib import md5
 
 import requests
 
-from .base import WechatSogouBase
 
-
-class RClient(WechatSogouBase):
+class RClient:
 
     def __init__(self, username, password, soft_id, soft_key):
         self.username = username

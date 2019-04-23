@@ -38,7 +38,6 @@ for item in mp_list:
         time.sleep(random.randrange(1, 3))
         # 查看一下该号今天是否已经发送文章
         last_qunfa_id = item['last_qunfa_id']
-        last_qunfa_time = item['last_qufa_time']
 
         cur_qunfa_id = last_qunfa_id
         wz_url = item['wz_url']
