@@ -10,9 +10,9 @@ import time
 import requests
 
 from . import config
+from .chaojiying import Chaojiying_Client
 from .exceptions import *
 from .filecache import WechatCache
-from .ruokuaicode import RClient
 
 try:
     from urllib.request import quote as quote
@@ -49,10 +49,10 @@ class WechatSogouBasic:
                                                        rfc2109=False))
             self._session.cookies.update(cookie_jar)
 
-        self.dama_name = config.dama_name
-        self.dama_pswd = config.dama_pswd
-        if self.dama_name != '' and self.dama_pswd != '':
-            self._ocr = RClient(self.dama_name, self.dama_pswd, '126169', 'b24ad7cdfac84ad8a7d36e97079258f5')
+        self.cjy_name = config.cjy_name
+        self.cjy_pswd = config.cjy_pswd
+        if self.cjy_name != '' and self.cjy_pswd != '':
+            self._ocr = Chaojiying_Client(self.cjy_name, self.cjy_pswd, '31ae38ecbf750bc16a24dd78206f5499')
 
         self._agent = [
             "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:43.0) Gecko/20100101 Firefox/43.0",
@@ -156,13 +156,13 @@ class WechatSogouBasic:
                                                          quote('http://weixin.sogou.com/weixin?type=1&query='
                                                                + self._name)})
                 coder = self._session.get(codeurl, verify=False)
-                result = self._ocr.create(coder.content, 3060)
-                if 'Result' not in result:
-                    print(u"若快识别失败，错误为：%s 1秒后更换验证码再次尝试，尝试次数：%d" % (result['Error'], max_count))
+                result = self._ocr.create(coder.content, 1902)
+                if result['err_str'] != 'OK':
+                    print(u"超级鹰识别失败，错误为：%s 1秒后更换验证码再次尝试，尝试次数：%d" % (result['err_str'], max_count))
                     time.sleep(1)
                     continue  # 验证码识别错误，再次执行
                 else:
-                    img_code = result['Result']
+                    img_code = result['pic_str']
                     print(u"验证码识别成功 验证码：%s" % img_code)
 
                     post_url = 'https://weixin.sogou.com/antispider/thank.php'
@@ -228,13 +228,13 @@ class WechatSogouBasic:
                 timever = timestr[0:13] + '.' + timestr[13:17]
                 codeurl = 'http://mp.weixin.qq.com/mp/verifycode?cert=' + timever
                 coder = self._session.get(codeurl, verify=False)
-                result = self._ocr.create(coder.content, 2040)
-                if 'Result' not in result:
-                    print(u"若快识别失败，错误为：%s 1秒后更换验证码再次尝试，尝试次数：%d" % (result['Error'], max_count))
+                result = self._ocr.create(coder.content, 1902)
+                if result['err_str'] != 'OK':
+                    print(u"超级鹰识别失败，错误为：%s 1秒后更换验证码再次尝试，尝试次数：%d" % (result['err_str'], max_count))
                     time.sleep(1)
                     continue  # 验证码识别错误，再次执行
                 else:
-                    img_code = result['Result']
+                    img_code = result['pic_str']
                     print(u"验证码识别成功 验证码：%s" % img_code)
 
                     post_url = 'http://mp.weixin.qq.com/mp/verifycode'
