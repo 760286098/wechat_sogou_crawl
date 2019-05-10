@@ -34,3 +34,14 @@ class Chaojiying_Client(object):
         r = requests.post('http://upload.chaojiying.net/Upload/Processing.php', data=params, files=files,
                           headers=self.headers)
         return r.json()
+
+    def report_error(self, im_id):
+        """
+        im_id:报错题目的图片ID
+        """
+        params = {
+            'id': im_id,
+        }
+        params.update(self.base_params)
+        r = requests.post('http://upload.chaojiying.net/Upload/ReportError.php', data=params, headers=self.headers)
+        return r.json()

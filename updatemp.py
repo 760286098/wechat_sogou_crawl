@@ -1,112 +1,62 @@
 # -*- coding: utf-8 -*-
-# 查找公众号最新文章
 
-import logging.config
-import random
 import time
+import traceback
 
-# 导入包
 from wechatsogou import *
 
-# 日志
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger()
-
-# 搜索API实例
-wechats = WechatSogouApi()  # 不使用外部Cookie
-
-# 如果想使用外部cookie，主要是为了实现搜狗微信登录状态
-# 你需要安装chrom浏览器，然后给浏览器安装EditThisCooke这个插件
-# 1、使用Chrom浏览器登录搜狗微信
-# 2、使用EditThisCooke插件复制当前Cookie信息
-# 3、把cookie信息复制到代码目录下的cookies.txt文件
-# 4、开启下面这行语句
-# wechats = WechatSogouApi(cookies_file={'file_name':'cookies.txt'})  #使用外部cookie
-
-
-# 数据库实例
+wechats = WechatSogouApi()
 mysql = mysql('mp_info')
 
-# 循环获取数据库中所有公众号
-mysql.order_sql = " order by _id desc"
-mp_list = mysql.find(0)
-
-succ_count = 0
-
-for item in mp_list:
+mp_list = mysql.find(0, order_sql=" order by _id")
+for mp_item in mp_list:
     try:
-        time.sleep(random.randrange(1, 3))
         # 查看一下该号今天是否已经发送文章
-        last_qunfa_id = item['last_qunfa_id']
-
+        last_qunfa_id = mp_item['last_qunfa_id']
         cur_qunfa_id = last_qunfa_id
-        wz_url = item['wz_url']
-
-        print(item['name'])
+        wz_url = mp_item['wz_url']
+        print(mp_item['name'])
         # 获取最近文章信息
         wz_list = wechats.get_gzh_message(url=wz_url)
         if u'链接已过期' in wz_list:
-            wechat_info = wechats.get_gzh_info(item['wx_hao'])
+            wechat_info = wechats.search_gzh_info(mp_item['wx_hao'])
             if 'url' not in wechat_info:
                 continue
             wz_url = wechat_info['url']
             wz_list = wechats.get_gzh_message(url=wz_url)
-            mysql.where_sql = " _id=%s" % (item['_id'])
-            mysql.table('mp_info').where({'_id': item['_id']}).save(
-                {'wz_url': wechat_info['url'], 'logo_url': wechat_info['img'], 'qr_url': wechat_info['qrcode']})
-        # type==49表示是图文消息
-        qunfa_time = ''
+            mysql.table('mp_info').where({'_id': mp_item['_id']}).update(
+                {'wz_url': wechat_info['url'], 'logo_url': wechat_info['img'], 'qr_url': wechat_info['qrcode'],
+                 'recent_wz': wechat_info['recent'],
+                 'recent_time': wechat_info['recent_time'], })
         for wz_item in wz_list:
             temp_qunfa_id = int(wz_item['qunfa_id'])
-            if (last_qunfa_id >= temp_qunfa_id):
+            if last_qunfa_id >= temp_qunfa_id:
                 print(u"没有更新文章")
                 break
-            if (cur_qunfa_id < temp_qunfa_id):
+            if cur_qunfa_id < temp_qunfa_id:
                 cur_qunfa_id = temp_qunfa_id
-                qunfa_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(wz_item['datetime']))
-            succ_count += 1
             if wz_item['type'] == '49':
-                # 把文章写入数据库
-                # 更新文章条数
-                print(succ_count)
                 if not wz_item['content_url']:
                     continue
 
-                sourceurl = wz_item['source_url']
-                if len(sourceurl) >= 300:
-                    sourceurl = ''
-
-                # 如果想把文章下载到本地，请开启下面的语句,请确保已经安装：urllib2，httplib2，BeautifulSoup4
-                # 返回值为下载的html文件路径，可以自己保存到数据库
-                # index_html_path = wechats.down_html(wz_item['content_url'], wz_item['title'])
-
-                # 获取文章正文
-                wz_content = wechats.deal_article_content(url=wz_item['content_url'])
-
                 mysql.table('wenzhang_info').add({'title': wz_item['title'],
-                                                  'source_url': sourceurl,
-                                                  'content_url': wz_item['content_url'],
+                                                  'source_url': wz_item['source_url'],
                                                   'cover_url': wz_item['cover'],
                                                   'description': wz_item['digest'],
                                                   'date_time': time.strftime("%Y-%m-%d %H:%M:%S",
                                                                              time.localtime(wz_item['datetime'])),
-                                                  'mp_id': item['_id'],
+                                                  'mp_id': mp_item['_id'],
+                                                  'content_url': wz_item['content_url'],
                                                   'author': wz_item['author'],
-                                                  'msg_index': wz_item['main'],
-                                                  'copyright_stat': wz_item['copyright_stat'],
                                                   'qunfa_id': wz_item['qunfa_id'],
-                                                  'type': wz_item['type'],
-                                                  'content': wz_content})
-
+                                                  'msg_index': wz_item['main'],
+                                                  'content': wechats.deal_article_content(url=wz_item['content_url'])})
         # 更新最新推送ID
-        if (last_qunfa_id < cur_qunfa_id):
-            mysql.where_sql = " _id=%s" % (item['_id'])
-            mysql.table('mp_info').save({'last_qunfa_id': cur_qunfa_id, 'last_qufa_time': qunfa_time,
-                                         'update_time': time.strftime("%Y-%m-%d %H:%M:%S",
-                                                                      time.localtime(time.time()))})
-    except:  # 如果不想因为错误使程序退出，可以开启这两句代码
-        logger.exception("Exception Logged")
-        print(u"出错，继续")
+        if last_qunfa_id < cur_qunfa_id:
+            mysql.table('mp_info').where({'_id': mp_item['_id']}).update(
+                {'last_qunfa_id': cur_qunfa_id,
+                 'update_time': time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))})
+    except Exception:
+        traceback.print_exc()
         continue
-
 print('success')

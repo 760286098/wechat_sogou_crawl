@@ -1,8 +1,6 @@
-chardet
-httplib2
-lxml
-bs4
 pymysql
-werkzeug
+lxml
+beautifulsoup4
 requests
+
 

@@ -5,164 +5,59 @@ import pymysql
 from . import config
 
 
-class DbException(Exception):
-    """数据库 异常 基类
-    """
-    pass
-
-
-class MysqlDbException(DbException):
-    """数据库 myslq 异常类
-    """
-    pass
-
-
 class mysql:
     """数据库类
-
-    例子
-    m = M('user')
-    m.table('user').add({}) # 插入
-    m.table('user').where({}).save({}) # 更新
-    m.table('user').field(['id']).where({}).order({'id':'desc'}).find() # 读取，asc，desc
-    m.where({}).delete() # 删除
     """
 
-    def __init__(self, table='', prefix='', host='', user='', passwd='', db='', charset=''):
-        """初始化
+    def __init__(self, table=''):
+        self._conn = pymysql.connect(host=config.host, user=config.user, passwd=config.passwd, db=config.db,
+                                     charset=config.charset, cursorclass=pymysql.cursors.DictCursor)
+        self._cur = self._conn.cursor()
 
-        table是初始化选择的表，后面可以使用table()函数更改
-        prefix是数据表前缀，一般配置在config中
-        """
-        self.host = config.host
-        self.user = config.user
-        self.passwd = config.passwd
-        self.db = config.db
-        self.charset = config.charset
-
-        if host:
-            self.host = host
-        if user:
-            self.user = user
-        if passwd:
-            self.passwd = passwd
-        if db:
-            self.db = db
-        if charset:
-            self.charset = charset
-        if prefix:
-            self.prefix = prefix + '_'
-        elif config.prefix:
-            self.prefix = config.prefix + '_'
-        else:
-            self.prefix = ''
         if table:
-            self.tablename = self.prefix + table
-        self.__conn()
-
-    def __conn(self):
-        """连接数据库函数
-        """
-        self.conn = pymysql.connect(host=self.host, user=self.user, passwd=self.passwd, db=self.db,
-                                    charset=self.charset, cursorclass=pymysql.cursors.DictCursor)
-        self.cur = self.conn.cursor()
-        return self
+            self._table_name = table
+        self._where_sql = ''
 
     def __update(self, sqls):
         """更新语句，可执行update,insert语句
         """
         if type(sqls) is str:
-            self.cur.execute(sqls)
+            self._cur.execute(sqls)
         elif type(sqls) is list:
             for sql in sqls:
-                self.cur.execute(sql)
-        else:
-            raise MysqlDbException('更新语句参数错误 - Model.__update')
-        self.conn.commit()
-
-        return self.cur.lastrowid
-
-    def __delete(self, sql):
-        """删除语句
-        """
-        return self.cur.execute(sql)
-
-    def __query(self, sql):
-        """查询语句
-        """
-        return self.cur.execute(sql)
+                self._cur.execute(sql)
+        self._conn.commit()
 
     def __close(self):
         """关闭所有连接
         """
-        self.cur.close()
-        self.conn.close()
+        self._cur.close()
+        self._conn.close()
 
     def __del__(self):
         """析构函数
         """
-        self.conn.commit()
+        self._conn.commit()
         self.__close()
 
     """
     以下是封装的提供使用的
     """
 
-    def table(self, table, prefix=''):
+    def table(self, table):
         """设置数据表, 链式操作
         """
-        if prefix:
-            prefix = prefix + '_'
-        elif hasattr(self, 'prefix'):
-            prefix = self.prefix
-        else:
-            prefix = ''
-        self.tablename = prefix + table
-        return self
-
-    def limit(self, pre, count):
-        self.limit_sql = 'limit ' + str(pre) + ',' + str(count)
+        self._table_name = table
         return self
 
     def where(self, where):
         """设置条件, 链式操作
         """
-        if type(where) is str:
-            raise MysqlDbException('请输入字典 - Model.where')
-            # self.where_sql = where
-        elif type(where) is dict:
+        if type(where) is dict:
             where_sql = ''
             for k, v in where.items():
                 where_sql += "`" + str(k) + "` LIKE '" + str(v) + "' and "
-            self.where_sql = where_sql[:-5]
-        return self
-
-    def field(self, field):
-        """设置操作的字段
-        """
-        if type(field) is str:
-            if field == '*':
-                self.field_sql = "*"
-            else:
-                self.field_sql = "`" + field + "`"
-        elif type(field) is list:
-            field_dian = []
-            for f in field:
-                field_dian.append("`" + f + "`")
-            self.field_sql = ','.join(field_dian)
-        else:
-            raise MysqlDbException('field参数不是字符或者列表 - Model.field')
-        return self
-
-    def order(self, order):
-        """排序
-        """
-        if type(order) is dict:
-            for k, v in order.items():
-                self.order_sql = " order by `" + k + "` " + v
-                break
-        else:
-            raise MysqlDbException('排序参数不是字典 - Model.order')
+            self._where_sql = " where " + where_sql[:-5]
         return self
 
     def add(self, data):
@@ -173,47 +68,32 @@ class mysql:
         for k, v in data.items():
             ks += "`" + str(k).replace('\'', '\\\'') + "`,"
             vs += "'" + str(v).replace('\'', '\\\'') + "',"
-        if hasattr(self, 'tablename'):
-            sql = "insert into `" + self.tablename + "` (" + ks[:-1] + ") values (" + vs[:-1] + ")"
-            try:
-                return self.__update(sql)
-            except pymysql.err.IntegrityError:
-                pass
-        else:
-            raise MysqlDbException('缺少数据表 - Model.add')
+        sql = "insert into " + "`" + self._table_name + "` (" + ks[:-1] + ") values (" + vs[:-1] + ")"
+        self.__update(sql)
 
-    def save(self, data):
+    def update(self, data):
         """更新数据
         """
-        if not hasattr(self, 'where_sql'):
-            raise MysqlDbException('缺少where语句 - Model.save')
-        if not hasattr(self, 'tablename'):
-            raise MysqlDbException('缺少tablename - Model.save')
         data_sql = ''
         for k, v in data.items():
             data_sql += "`" + str(k) + "` = '" + str(v) + "',"
-        sql = "update `" + self.tablename + "` set " + data_sql[:-1] + " where " + self.where_sql + ";"
+        sql = "update `" + self._table_name + "` set " + data_sql[:-1] + self._where_sql + ";"
         self.__update(sql)
 
-    def find(self, size=25):
+    def find(self, size=25, order_sql=''):
         """查询数据
         """
-        where_sql = " where " + self.where_sql if hasattr(self, 'where_sql') else ""
-        field_sql = self.field_sql if hasattr(self, 'field_sql') else "*"
-        order_sql = self.order_sql if hasattr(self, 'order_sql') else ""
-        limit_sql = self.limit_sql if hasattr(self, 'limit_sql') else ""
-        sql = "select " + field_sql + " from `" + self.tablename + "`" + where_sql + order_sql + limit_sql
-        self.__query(sql)
+        sql = "select * from " + "`" + self._table_name + "`" + self._where_sql + order_sql
+        self.__update(sql)
         if size == 0:
-            return self.cur.fetchall()
+            return self._cur.fetchall()
         elif size == 1:
-            return self.cur.fetchone()
+            return self._cur.fetchone()
         else:
-            return self.cur.fetchmany(size)
+            return self._cur.fetchmany(size)
 
     def delete(self):
         """删除语句
         """
-        where_sql = " where " + self.where_sql if hasattr(self, 'where_sql') else ""
-        sql = "delete from `" + self.tablename + "`" + where_sql
-        return self.__delete(sql)
+        sql = "delete from " + "`" + self._table_name + "`" + self._where_sql
+        self.__update(sql)
