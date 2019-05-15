@@ -2,18 +2,6 @@ CREATE DATABASE IF NOT EXISTS `wechatsogou`;
 USE `wechatsogou`;
 
 --
--- Table structure for table `add_mp_list`
---
-DROP TABLE IF EXISTS `add_mp_list`;
-CREATE TABLE `add_mp_list`
-(
-    `_id`  int(11) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
-    `name` text COMMENT '要添加的公众号名称',
-    PRIMARY KEY (`_id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4;
-
---
 -- Table structure for table `mp_info`
 --
 DROP TABLE IF EXISTS `mp_info`;
@@ -42,18 +30,22 @@ CREATE TABLE `mp_info`
 DROP TABLE IF EXISTS `wenzhang_info`;
 CREATE TABLE `wenzhang_info`
 (
-    `_id`         int(11) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
-    `title`       text COMMENT '文章标题',
-    `source_url`  text COMMENT '原文地址',
-    `cover_url`   text COMMENT '封面图地址',
-    `description` text COMMENT '文章摘要',
-    `date_time`   datetime COMMENT '文章推送时间',
-    `mp_id`       int(11) COMMENT '对应的公众号ID',
-    `content_url` text COMMENT '文章临时地址',
-    `author`      text COMMENT '作者',
-    `qunfa_id`    int(30) COMMENT '群发消息ID',
-    `msg_index`   int(2) COMMENT '一次群发中的图文顺序 1是头条',
-    `content`     longtext COMMENT '文章正文',
+    `_id`             int(11) NOT NULL AUTO_INCREMENT COMMENT '自增ID',
+    `title`           text COMMENT '文章标题',
+    `source_url`      text COMMENT '原文地址',
+    `cover_url`       text COMMENT '封面图地址',
+    `description`     text COMMENT '文章摘要',
+    `date_time`       datetime COMMENT '文章推送时间',
+    `mp_id`           int(11) COMMENT '对应的公众号ID',
+    `content_url`     text COMMENT '文章临时地址',
+    `author`          text COMMENT '作者',
+    `qunfa_id`        int(30) COMMENT '群发消息ID',
+    `msg_index`       int(2) COMMENT '一次群发中的图文顺序 1是头条',
+    `content`         longtext COMMENT '文章正文',
+    `likes`           int(11) NOT NULL DEFAULT 0 COMMENT '点赞量',
+    `browse_times`    int(11) NOT NULL DEFAULT 0 COMMENT '浏览量',
+    `comments`        int(11) NOT NULL DEFAULT 0 COMMENT '评论数',
+    `WordCloud_Graph` text COMMENT '词云图',
     PRIMARY KEY (`_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;

@@ -66,8 +66,8 @@ class mysql:
         ks = ''
         vs = ''
         for k, v in data.items():
-            ks += "`" + str(k).replace('\'', '\\\'') + "`,"
-            vs += "'" + str(v).replace('\'', '\\\'') + "',"
+            ks += "`" + str(k).replace('\'', '\\\'').replace('\\', '\\\\') + "`,"
+            vs += "'" + str(v).replace('\'', '\\\'').replace('\\', '\\\\') + "',"
         sql = "insert into " + "`" + self._table_name + "` (" + ks[:-1] + ") values (" + vs[:-1] + ")"
         self.__update(sql)
 

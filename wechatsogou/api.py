@@ -96,8 +96,6 @@ class WechatSogouApi:
             url_temp = "%s&k=%s&h=%s" % (url_temp, k, h)
             # 转成正式的文章列表url
             text = self._get(url_temp, referer=request_url).text
-            # text = self._get_by_unlock(url_temp, unlock_platform=self._unlock_sogou, host='weixin.sogou.com',
-            #                            referer=request_url).text
             arr = text.split("url +=")
             for iterating_var in arr:
                 url += iterating_var.split("'")[1]
@@ -184,23 +182,32 @@ class WechatSogouApi:
         return r
 
     def _unlock_sogou(self, url):
-        self._session.headers.update(
-            {'referer': 'https://weixin.sogou.com/antispider/?from=' + urllib.parse.quote(url)})
+        user_agent = random.choice(self._agents)
+        headers = {
+            "Host": 'weixin.sogou.com',
+            "Upgrade-Insecure-Requests": '1',
+            "User-Agent": user_agent,
+            "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            "Referer": 'https://weixin.sogou.com/',
+            "Accept-Encoding": 'gzip, deflate, sdch',
+            "Accept-Language": 'zh-CN,zh;q=0.8'
+        }
+
         r_captcha = self._session.get(
-            'http://weixin.sogou.com/antispider/util/seccode.php?tc={}'.format(int(round(time.time() * 1000))))
+            'https://weixin.sogou.com/antispider/util/seccode.php?tc=' + str(time.time())[0:10], headers=headers)
         if not r_captcha.ok:
             raise WechatSogouRequestsException('WechatSogouAPI get img', r_captcha)
 
-        unlock_url = 'http://weixin.sogou.com/antispider/thank.php'
+        unlock_url = 'https://weixin.sogou.com/antispider/thank.php'
         data = {
             'c': self._identify_image(r_captcha.content),
             'r': urllib.parse.quote(url),
             'v': 5
         }
         headers = {
-            'User-Agent': random.choice(self._agents),
+            'User-Agent': user_agent,
             'Host': 'weixin.sogou.com',
-            'Referer': 'http://weixin.sogou.com/antispider/?from=%2f' + urllib.parse.quote(
+            'Referer': 'https://weixin.sogou.com/antispider/?from=%2f' + urllib.parse.quote(
                 url.replace('https://', ''))
         }
         r_unlock = self._session.post(unlock_url, data, headers=headers)
@@ -228,9 +235,9 @@ class WechatSogouApi:
                  '&domain=weixin&suv=%s&snuid=%s&t=%s' % (
                      '', remsg['id'], str(time.time())[0:10])
         headers = {
-            'User-Agent': random.choice(self._agents),
+            'User-Agent': user_agent,
             'Host': 'pb.sogou.com',
-            'Referer': 'http://weixin.sogou.com/antispider/?from=%2f' + urllib.parse.quote(
+            'Referer': 'https://weixin.sogou.com/antispider/?from=%2f' + urllib.parse.quote(
                 url.replace('https://', ''))
         }
         self._session.get(pb_url, headers=headers)
@@ -275,6 +282,11 @@ class WechatSogouApi:
                     continue
                 else:
                     img_code = result['pic_str']
+                    if len(img_code) != 4 and len(img_code) != 6:
+                        print(u"超级鹰识别失败，错误为：%s 更换验证码再次尝试，尝试次数：%d" % (result['pic_str'], i))
+                        self._ocr.report_error(self.__pic_id)
+                        time.sleep(1)
+                        continue
                     print(u"验证码识别成功 验证码：%s" % img_code)
                     return img_code
 
@@ -295,6 +307,8 @@ class WechatSogouApi:
 
             r = self._get(url, referer='https://weixin.sogou.com/antispider/?from=%2f' + urllib.parse.quote(
                 url.replace('https://', '')), host=host)
+            if 'antispider' in r.url:
+                raise WechatSogouVcodeOcrException()
         return r
 
     @staticmethod
@@ -357,7 +371,7 @@ class WechatSogouApi:
                 app_msg_ext_info = listdic['app_msg_ext_info']
                 url = app_msg_ext_info.get('content_url')
                 if url:
-                    url = 'http://mp.weixin.qq.com' + url if 'http://mp.weixin.qq.com' not in url else url
+                    url = 'https://mp.weixin.qq.com' + url if 'https://mp.weixin.qq.com' not in url else url
                 else:
                     url = ''
                 msg_index = 1
@@ -375,7 +389,7 @@ class WechatSogouApi:
                     for multidic in app_msg_ext_info['multi_app_msg_item_list']:
                         url = multidic.get('content_url')
                         if url:
-                            url = 'http://mp.weixin.qq.com' + url if 'http://mp.weixin.qq.com' not in url else url
+                            url = 'https://mp.weixin.qq.com' + url if 'https://mp.weixin.qq.com' not in url else url
                         else:
                             url = ''
                         itemnew = dict()

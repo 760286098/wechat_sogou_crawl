@@ -1,3 +1,5 @@
+jieba
+wordcloud
 pymysql
 lxml
 beautifulsoup4
