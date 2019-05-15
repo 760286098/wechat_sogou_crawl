@@ -26,9 +26,6 @@
 该文件遍历待抓取列表（数据库表：mp_info），查询表中的公众号是否有新文章发布，如果有，就抓取新的文章信息并
 放入数据库表wenzhang_info中
 
-2、updatewenzhang.py
-该文件遍历文章表，然后抓取24小时之内的文章阅读数据存入表wenzhang_info和表wenzhang_statistics中
-
-3、 auto_add_mp.py
+2、auto_add_mp.py
 该文件将指定的公众号添加到待抓取列表中
 该文件读取数据库表（add_mp_list）中的内容，然后将其中指定的公众号填入数据库表（mp_info）中
